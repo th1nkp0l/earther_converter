@@ -1,0 +1,9 @@
+planet,orbital_period,year_multiplier,demonym,day_length
+mercury,87.969,4.1491889188,hermean,58.646
+venus,224.7,1.624388073,venusian,243
+earth,365.25,0.9993155373,terran,1
+mars,687,0.5312954876,martian,1.0275
+jupiter,4332.59,0.0842452205,jovian,0.415
+saturn,10759,0.033925086,saturnian,0.444
+uranus,30688.5,0.0118937061,uranian,0.718
+neptune,60182,0.0060649364,neptunian,0.67
