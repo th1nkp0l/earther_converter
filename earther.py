@@ -8,7 +8,7 @@ import pandas as pd
 Inspired by the television show The Expanse, earther_converter is a project
 built around a short interaction with a black market travel document forger.
 The forger asks a series of questions to produce the eventual diplomatic
-travel authorization.
+travel authorization paperwork.
 
 Learning goals:
 Uses conversion table from csv to convert one planet "age" to another.
