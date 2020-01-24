@@ -5,24 +5,18 @@ from datetime import datetime
 import pandas as pd
 
 '''
-Earther Converter is a program designed to take some user input and do age
-conversions based on what planet they're from.
-If from Earth, takes user's birth date and calculates their age first.
-If from another planet, takes user's age in home planet years as the
-starting point.
+Inspired by the television show The Expanse, earther_converter is a project
+built around a short interaction with a black market travel document forger.
+The forger asks a series of questions to produce the eventual diplomatic
+travel authorization.
 
-Goals:
-Uses conversion table from csv to do all the math
-Learn to work with dates in python3
-Do some web scraping for relevant info. For now, all will come from csv.
-Create a some checks to ensure good inputs for:
+Learning goals:
+Uses conversion table from csv to convert one planet "age" to another.
+Uses same csv to look up the demonym (Mars -> Martian) for each planet.
+Work with dates in python3
+Create a some checks to ensure good inputs
     year, month, day, planet, yes, no
 '''
-
-# TO DO
-# Create a function for the count to three, then quit, functionality. Is there
-# a way to do this given that one of my questions will require a for loop and
-# others will not?
 
 # defines some options when asked a yes or no question
 affirmative = [
@@ -64,6 +58,7 @@ days_in_month = {
 "12" : 31
 }
 
+#lists the planets for acceptable entries
 planets = [
 "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune",
 "Pluto"
@@ -80,54 +75,69 @@ def birth_yr_input():
             birth_year = int(choice)
             return birth_year
         elif x == 0:
-            print("Belter: \"Try again. What's your birth year?\"")
+            print("Belter: Try again. What's your birth year?")
         elif x == 1:
-            print("Belter: \"We don't have much time! Give me the year.\"")
+            print("Belter: We don't have much time! Give me the year.")
         else:
-            print("Belter: \"I'm not going to jail today! Pashang fong!\"")
+            print("Belter: I'm not going to jail today! Pashang fong!")
             quit()
 
+#Evaluates for acceptable birth months
 def birth_mth_input():
-#Gives the user 3 tries to input a permitted value
     print("What month ya born?")
     for x in range(0,3):
         choice = input(f"{first_name}: ").lower()
 #For loop and if statement tests for presence of user input in the dictionary
-#of possible months. If found, sets month variable to the key value, which is
+#of possible months. If found, sets birth_month to the key value, which is
 #month in %m or zero-padded decimal format
+#Will leave it as a string for later use in key lookup within dictionary
         for i in month_dict:
             if choice in month_dict[i]:
                 birth_month = i
                 return birth_month
         if x == 0:
-            print("Belter: \"Try again!\"")
+            print("Belter: Try again!")
         elif x == 1:
-            print("Belter: \"That's not an Earth month!\"")
+            print("Belter: That's not an Earth month!")
         else:
-            print("Belter: \"I don't have time for you, nekangepensa!\"")
+            print("Belter: I don't have time for you, nekangepensa!")
     quit()
 
+#Input and check for birth day. Only thing I decided not to do was mess with
+#leap year checks. Allows 29 days in Feb.
 def birth_day_input(birth_month):
-    print("Belter: \"And what day\"")
+    print("Belter: And what day?")
     for x in range(0,3):
-        choice = int(input(f"{first_name}: "))
+        choice = input(f"{first_name}: ")
+        try:
+            choice = int(choice)
+        except:
+            print("Belter: Numbers only!")
         if choice in range((days_in_month[birth_month])+1):
             return choice
         elif x == 0:
-            print("Belter: \"That doesn't make sense, try again.\"")
+            print("Belter: That doesn't make sense, try again.")
         elif x == 1:
-            print("Belter: \"I'm getting tired of your mistakes.\"")
+            print("Belter: I'm getting tired of your mistakes.")
         else:
             print("\tWas a simple question, sabakawala! Get out of here!")
             quit()
 
 # function for determining user's Earth birth date
 def earth_birth():
-    print("Belter: \"Ok Tumang. Let's find out how old you are.\"")
     birth_year = birth_yr_input()
     birth_month = birth_mth_input()
     birth_day = birth_day_input(birth_month)
-    return birth_year, birth_month, birth_day
+    today = date.today()
+    days_in_year = 365.2425
+    month_printed = (month_dict[birth_month])[0].capitalize()
+    print("Belter: Ok Tumang. Let's find out how old you are.")
+    print(f"Born on Earth, {month_printed} {birth_day}, {birth_year}.")
+    print(f"The date on Earth today is {today}")
+    birth_date = date(birth_year, int(birth_month), birth_day)
+    age = int((today - birth_date).days / days_in_year)
+    print(f"That makes you {age} years old.")
+    return age
 
 def planet_checker():
     for x in range(0,3):
@@ -143,54 +153,59 @@ def planet_checker():
             print("\tSabaka! I don't have time for this. Pashang fong!")
             quit()
 
-
-#Defines a function to calculate user's Earth age based on birth date input
-def earth_age_calc(birth_year, birth_month, birth_day):
-    today = date.today()
-    month_printed = (month_dict[birth_month])[0].capitalize()
-    print(f"Born on Earth, {month_printed} {birth_day}, {birth_year}.")
-    print(f"The date on Earth today is {today}")
-    age = 33
-    print(f"That makes you {age} years old.")
-    return age
-
 #Calculates user's age in destination planet years
-def planet_age_calc(birth_planet, earth_age, destination):
+def planet_age_calc(birth_planet, destination, demo_destination):
+    birth_mult = (data.loc[data.planet == birth_planet, 'year_multiplier'])
+    birth_mult = float(birth_mult)
+    dest_mult = (data.loc[data.planet == destination, 'year_multiplier'])
+    dest_mult = float(dest_mult)
     if birth_planet != "Earth":
-        print(f"Belter: \"How old in {birth_planet} years are you?\"")
-        age = input(f"{first_name}: ")
-        age *= 2
+        print(f"Belter: How old in {birth_planet} years are you?")
+        for x in range(0,3):
+            initial_age = input(f"{first_name}: ")
+            try:
+                initial_age = float(initial_age)
+                break
+            except:
+                print("Belter: Numbers only!")
+            if x == 0:
+                print("Belter: That doesn't make sense, try again.")
+            elif x == 1:
+                print("Belter: I'm getting tired of your mistakes.")
+            else:
+                print("\tWas a simple question, sabakawala! Get out of here!")
+                quit()
+        age = initial_age / birth_mult * dest_mult
+        age = round(age, 2)
     else:
-        print(f"Belter: \"Why would you want to leave Earth, anyway, {first_name}?\n \
-        Nevermind, don't tell me!\"")
-        age = earth_age
+        initial_age = earth_birth()
+        age = initial_age / birth_mult * dest_mult
+        age = round(age, 2)
     print("Belter taps his head as he works through some math...")
     input("...")
     input("... ...")
-    print("Belter: Give me a break, I was doing a little math! \n")
+    print("Belter: Give me a break, I was doing a little math!")
+    print(f"\tRemember, now you're {age} in {demo_destination} years\n")
     return age
 
 #Questioning path for users born on Earth
 def earth_born():
     birth_planet = "Earth"
     demo_birth = demonym_izer(birth_planet)
-    print("Belter: \"What planet you going to, Earther?\"")
+    print("Belter: \"What planet you need papers for, Earther?\"")
     destination = planet_checker()
     demo_destination = demonym_izer(destination)
-    year, month, day = earth_birth()
-    earth_age = earth_age_calc(year, month, day)
-    return birth_planet, destination, earth_age, demo_destination, demo_birth
+    return birth_planet, destination, demo_destination, demo_birth
 
 #Questioning path for users born off Earth
 def elsewhere_born():
-    print("Belter: \"Then where are you from?\"")
+    print("Belter: Then where are you from?")
     birth_planet = planet_checker()
     demo_birth = demonym_izer(birth_planet)
-    print(f"Belter: \"What planet you going to, {demo_birth} kopeng?\"")
+    print(f"Belter: What's your new home planet, {demo_birth} kopeng?")
     destination = planet_checker()
     demo_destination = demonym_izer(destination)
-    earth_age = "null"
-    return birth_planet, destination, earth_age, demo_destination, demo_birth
+    return birth_planet, destination, demo_destination, demo_birth
 
 def demonym_izer(origin):
     demonym = (data.loc[data.planet == origin, 'demonym'])
@@ -204,47 +219,53 @@ data = pd.read_csv("conversiontable.csv")
 
 print("***You're with an belter who you've never met in a dark store room.***\n")
 
-print("Belter: \"So you need some travel docs? \n\
+print("Belter: So you need some travel docs? \n\
 \tKowlting gonya gut - eveything gon' be good. \n\
 \tNow let's get this done before we get caught, kopeng.")
-full_name = input("\tKeting nem to? I mean, what's your full name?\" \nYou: ")
+full_name = input("\tKeting nem to? I mean, what's your full name? \nYou: ")
 full_name = full_name.title()
 names = full_name.split(" ")
 first_name = names[0]
 last_name = names[-1]
 
-print(f"Belter: \"Are you an Earther, beratna?\"")
+print(f"Belter: Are you an Earther, beratna?")
 
 for count in range(0,3):
     terran = input(f"{first_name}: ")
     if terran.lower() in affirmative:
-        birth_planet, destination, earth_age, demo_destination, demo_birth = earth_born()
+        birth_planet, destination, demo_destination, demo_birth = earth_born()
         break
     elif terran.lower() in negative:
-        birth_planet, destination, earth_age, demo_destination, demo_birth = elsewhere_born()
+        birth_planet, destination, demo_destination, demo_birth = elsewhere_born()
         break
     elif count == 0:
-        print(f"You don't follow instructions too well, eh {first_name}?")
+        print(f"Simple question, no?")
     elif count == 1:
-        print(f"You don't follow instructions too well, eh {first_name}?")
+        print(f"Let's move forward here or part ways, {first_name}.")
     else:
-        print(f"Oh fuck off, then.")
+        print(f"OK, I'm not in the business of dealing with pendejos.")
         quit()
 
-age = planet_age_calc(birth_planet, earth_age, destination)
+age = planet_age_calc(birth_planet, destination, demo_destination)
 
-print(f"Belter: \"OK Mr. {last_name}, we're finished here. \n\
+#Creates a list, then string, for approved travel destinations. All planets
+#are approved by default, excluding the new home planet for obv reasons.
+approved_dest = []
+for p in planets:
+    if p != destination:
+        approved_dest.append(p)
+approved_dest = ", ".join(approved_dest)
+
+
+print(f"\tOK Mr. {last_name}, we're finished here. \n\
 \tHere are the files, beratna. You can now call yourself a {demo_destination}. \n\
 \tJust don't tell me what you're doing with these.\n\
-\tAlways watch out for doors and corners. That's where they get you.\"\n")
-print("***You look down at your hand terminal.*** \n")
+\tAlways watch out for doors and corners. That's where they get you.\n")
+input("***You look down at your hand terminal.*** \n")
 
-input(">>>Diplomatic Travel Authorization<<<\n")
-
-#Create list of all planets other than the new birth planet to use in app dest
-#planet_list = 
+print(">>>Diplomatic Travel Authorization<<<\n")
 
 print(f"\tCitizen: {full_name}")
 print(f"\tBirth Planet: {destination}")
 print(f"\tAge: {age} {destination} years")
-print(f"\tApproved Destinations: ")
+print(f"\tApproved Destinations: {approved_dest}")
