@@ -125,18 +125,18 @@ def birth_day_input(birth_month):
 
 # function for determining user's Earth birth date
 def earth_birth():
+    print("Belter: Ok Tumang. Let's find out how old you are.")
     birth_year = birth_yr_input()
     birth_month = birth_mth_input()
     birth_day = birth_day_input(birth_month)
     today = date.today()
     days_in_year = 365.2425
     month_printed = (month_dict[birth_month])[0].capitalize()
-    print("Belter: Ok Tumang. Let's find out how old you are.")
-    print(f"Born on Earth, {month_printed} {birth_day}, {birth_year}.")
-    print(f"The date on Earth today is {today}")
+    print(f"Belter: Born on Earth, {month_printed} {birth_day}, {birth_year}.")
+    print(f"\tThe date on Earth today is {today}")
     birth_date = date(birth_year, int(birth_month), birth_day)
     age = int((today - birth_date).days / days_in_year)
-    print(f"That makes you {age} years old.")
+    print(f"\tSo you're... {age} years old.")
     return age
 
 def planet_checker():
